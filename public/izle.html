@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Canlı İzle</title>
+  <style>
+    body { margin: 0; background: #000; }
+    img { width: 100%; }
+  </style>
+</head>
+<body>
+  <img id="live" alt="Canlı yayın yükleniyor..." />
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io('/izle');
+    const img = document.getElementById('live');
+
+    socket.on('frame', data => {
+      img.src = data;
+    });
+  </script>
+</body>
+</html>
