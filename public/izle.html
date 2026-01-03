@@ -1,23 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Canlı İzle</title>
+  <title>Canlı İzle (Şifreli)</title>
   <style>
-    body { margin: 0; background: #000; }
-    img { width: 100%; }
+    body { margin: 0; background: #000; color: white; font-family: Arial; text-align: center; padding: 50px; }
+    #passwordScreen { margin-top: 100px; }
+    input { padding: 15px; font-size: 20px; width: 300px; margin: 20px; border-radius: 10px; border: none; }
+    button { padding: 15px 30px; font-size: 20px; background: #5865F2; color: white; border: none; border-radius: 10px; cursor: pointer; }
+    #liveContainer { display: none; }
+    img { max-width: 90%; margin: 20px auto; border: 3px solid #F24747; border-radius: 10px; }
+    h1 { font-size: 40px; }
   </style>
 </head>
 <body>
-  <img id="live" alt="Canlı yayın yükleniyor..." />
+  <div id="passwordScreen">
+    <h1>🔒 GİZLİ CANLI İZLEME</h1>
+    <p>Şifreyi girmeden izleyemezsin.</p>
+    <input type="password" id="pass" placeholder="Şifreyi gir" />
+    <br/>
+    <button onclick="checkPassword()">Giriş Yap</button>
+    <p id="error" style="color: red; margin-top: 20px;"></p>
+  </div>
+
+  <div id="liveContainer">
+    <h1>📹 CANLI YAYIN</h1>
+    <img id="live" alt="Yükleniyor..." />
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io('/izle');
-    const img = document.getElementById('live');
+    const correctPassword = '2u$tQGG5M^0I'; // BURAYI DEĞİŞTİR! İstediğin şifreyi yaz (örneğin 'korku2026')
 
-    socket.on('frame', data => {
-      img.src = data;
-    });
+    function checkPassword() {
+      const input = document.getElementById('pass').value;
+      const error = document.getElementById('error');
+
+      if (input === correctPassword) {
+        document.getElementById('passwordScreen').style.display = 'none';
+        document.getElementById('liveContainer').style.display = 'block';
+        startLive();
+      } else {
+        error.textContent = 'Yanlış şifre kanka!';
+      }
+    }
+
+    function startLive() {
+      const socket = io('/izle');
+      const img = document.getElementById('live');
+
+      socket.on('frame', data => {
+        img.src = data;
+      });
+    }
   </script>
 </body>
 </html>
